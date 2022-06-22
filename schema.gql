@@ -1,0 +1,504 @@
+type Edge {
+  cursor: String
+  node: String
+}
+"""
+  A User on the retala app platform.
+"""
+type User {
+  _id: ID!
+  name: String!
+  phone: String!
+  password: String
+  email: String!
+  profile_imgs: String!
+  role: Int!
+  token: String
+  phoneNumberVerified: Boolean!
+  emailVerified: Boolean!
+  createdAt: String
+  updatedAt: String
+}
+"""
+  An employee that can be created by a merchant and assigned to a branch.
+"""
+type Seller {
+  _id: ID!
+  name: String!
+  lastLogin: String!
+  device:String!
+  email: String!
+  role: String!
+  password: String!
+  branch: Branch!
+  merchant: Merchant!
+  createdAt: String
+  updatedAt: String
+}
+
+type LoginReturnType {
+  user: User
+  type: Int
+  merchant: Merchant
+  branch: Branch
+}
+
+type Customer {
+  _id: ID!
+  name: String!
+  phone: String!
+  bill: Int!
+  branch: ID!
+  merchant:ID!
+  transactions: [RetalaOrder!]
+  createdAt: String
+  updatedAt: String
+}
+
+type Setting {
+  notification: Boolean
+  tax: Boolean
+  printer: String
+  trialStatus:  Boolean
+  referral: String
+  subscription: String
+  planId: ID
+  plan: RetalaSubscriptionPlan!
+  subscriptionStatus: Boolean
+  subscriptionDate: String
+  subscriptionExpiryDate: String
+}
+
+type CardSetting {
+  authorization_code: String
+  card_type: String
+  last4: String
+  exp_month: String
+  exp_year: String
+  bin: String
+  bank: String
+  channel: String
+  signature: String
+  reusable: Boolean
+  country_code: String
+}
+
+type Merchant {
+  _id: ID!
+  name: String
+  owner:  User!
+  city: String
+  state: String
+  referral: String
+  setting: Setting 
+  # change setting later to be of type setting
+  cardDetails: CardSetting
+  # change cardDetails later to be of type card
+  createdAt: String
+  updatedAt: String
+  branches: [Branch!]!
+}
+
+type Product {
+  _id: ID!
+  name: String!
+  merchant: Merchant!
+  image: String
+  barcode: String
+  price: Int!
+  costPrice: Int!
+  minimumStock: Int!
+  packProduct: ID!
+  unpackable: Boolean
+  stockable: Boolean
+  packQuantity: Int
+  branch: Branch!
+  quantity: Quantity!
+  createdAt: String
+  updatedAt: String
+}
+
+type Payment {
+  ref: String!
+  status: String!
+  url: String!
+  amount: String!
+  type: String!
+  merchant: Merchant
+  duration: Int!
+  plan:ID!
+  createdAt: String
+  updatedAt: String
+}
+"""
+  Branch type, specifies what a branch is
+"""
+type Branch {
+  _id: ID!
+  name: String!
+  address: String
+  state: String
+  merchant: Merchant
+  createdAt: String!
+}
+
+type Quantity {
+  _id: ID!
+  product: Product
+  branch: Branch!
+  quantity: Int!
+  price: Int!
+  createdAt: String
+  updatedAt: String
+}
+
+type Restock {
+  _id: ID
+  branch: Branch
+  type: String
+  receiveBranch: Branch
+  seller: Seller
+  createdAt: String
+  status: Boolean
+  items: [Product]
+  updatedAt: String
+}
+
+type ProductDetailByBranchesReturnType {
+  count: Int!
+  networth: Int!
+}
+
+type RetalaSubscriptionPlan {
+  title: String
+  _id: ID!
+  monthly: Int!
+  annual: Int!
+  access: [String!]
+}
+
+type RetalaOrder {
+  _id: ID!
+  title: String
+  invoiceNo: String
+  type: String
+  orderTotal: Int!
+  tax: Int!
+  discount: String
+  grandTotal: Int!
+  branch: Branch!
+  customer: Customer
+  status: String
+  orderItems: [OrderItem_]
+  payments: Payment
+  seller: Seller
+  user: User
+  createdAt: String
+  updatedAt: String
+}
+
+type OrderItem_ {
+  product: Product!
+  quantity: Int!
+}
+
+
+type Query {
+  users: [User!]!
+  user(id: String!): User!
+  findUserByEmail(email: String!):User!
+  findUserByPhone(phoneNumber: String): User!
+  checkUserEmail(email: String!): Result
+  requestPasswordResetLink(email: String!): Result!
+  getUser(token: String!): User!
+  sellers: [Seller!]!
+  findSellerById(id: String!): Seller!
+  findSellerByMerchant(merchantId: String!): [Seller!]!
+  getBranchSellers(id: ID!):[Seller!]!
+  merchants: [Merchant!]!
+  findMerchantById(id: String!): Merchant!
+  branches: [Branch!]!
+  branch(id: ID!): Branch!
+  findMerchantBranches(id: ID!): [Branch!]!
+  getCustomer(id: ID!): Customer!
+  getCustomers: [Customer!]! 
+  getMerchantCustomers(id: ID!):[Customer!]!
+  searchCustomers(id: ID!, customerName: String!): Customer
+  deleteCustomer(id: ID!): Customer!
+  getProduct(id: ID!): Product!
+  getProducts: [Product!]!
+  getProductsByBranches(id: ID!): [Product!]!
+  getMerchantProducts(id: ID!): [Product!]
+  getBatchBranchProducts(merchantId: ID!, branchId: ID!): [Product!]!
+  getProductDetailsByBranches(merchant: ID!, branch: ID!): ProductDetailByBranchesReturnType!
+  search(searchParams: ProductSearchParams): [Product!]
+  getPayments: [Payment!]!
+  getPayment(id: ID!): Payment!
+  getMerchantPayments(id: ID!): Payment!
+  getQuantity(id: ID!): Quantity!
+  getQuantities: [Quantity!]!
+  getBranchQuantities(product: ID!, branch: ID!): [Quantity!]!
+  getPlan(id: ID!): RetalaSubscriptionPlan!
+  getPlans: [RetalaSubscriptionPlan!]!
+  orders:[RetalaOrder!]!
+  order(id: ID): RetalaOrder!
+  getBranchOrders(params: GetBranchOrders): [RetalaOrder!]
+}
+
+input CreateSellerParams {
+  name: String!
+  email: String!
+  role: String!
+  password: String!
+  branch: ID!
+  merchant: ID!
+}
+
+input CreateAccountParams {
+  name: String!
+  role: Int!
+  password: String!
+  email: String!
+  phone: String!
+  referral: String!
+  businessName: String!
+  state: String!
+  confirm: String!
+}
+
+type Result {
+  status: String!
+  data: String
+  token: String
+  merchant: Merchant
+}
+
+input UpdateUserAccountParams {
+  name: String!,
+  role: Int!
+}
+
+input CreateMerchantParams {
+  name: String!
+  owner: ID!
+  state: String
+  referral: String
+}
+
+input EditRetalaMerchantParams { 
+  name: String!
+  owner: ID!
+  setting: SettingParams!
+  cardDetails: CardSettingParams!
+}
+
+input SettingParams {
+  notification: Boolean
+  tax: Boolean
+  printer: String
+  trialStatus:  Boolean
+  referral: String
+  subscription: String
+  planId: ID
+  subscriptionStatus: Boolean
+  subscriptionDate: String
+  subscriptionExpiryDate: String
+}
+
+input CardSettingParams {
+  authorization_code: String
+  card_type: String
+  last4: String
+  exp_month: String
+  exp_year: String
+  bin: String
+  bank: String
+  channel: String
+  signature: String
+  reusable: Boolean
+  country_code: String
+}
+
+input CreateRetalaBranchParams {
+  name: String,
+  address: String
+  state: String
+  merchant: ID!
+}
+
+input EditRetalaBranchParams {
+  name: String
+  address: String
+  state: String
+}
+
+input CreateRetalaCustomerParams {
+  name: String!
+  phone: String!
+  merchant:ID!
+}
+
+input createRetalaProductParams {
+  name: String
+  quantity: Int
+  barcode: String
+  branch: [ID!]!
+  costPrice: Int!
+  price: Int!
+  merchant: ID!
+  minimumStock: Int!
+  stockable: Boolean!
+  unpackable: Boolean
+}
+
+input EditRetalaProductParams {
+  name: String
+  quantity: Int
+  barcode: String
+  branch: [ID!]
+  costPrice: Int
+  price: Int
+  merchant: ID
+  minimumStock: Int
+  stockable: Boolean
+  unpackable: Boolean
+}
+
+input unpackProductsParams {
+  productId: ID!
+  packProduct: ID!
+  branchId: ID!
+  quantity: Int!
+}
+
+input ProductSearchParams {
+  term: String!
+  merchant: ID!
+  branch: ID!
+}
+
+input CreateRetalaPaymentParams {
+  type: String!,
+  merchant: ID!
+  ref: String!
+  duration: Int!
+  plan: ID!
+}
+
+input CreateRetalaQuantityParams {
+  product: ID!
+  branch: ID!
+  quantity: Int!
+  price: Int!
+}
+
+input CreateRestockParams {
+  branch: ID!
+  type: String
+  receiveBranch: ID
+  items: [OrderItem]
+  seller: ID
+}
+
+input ChangeTransferParams {
+  restockId: ID!
+  branch: ID
+  receiveBranch: ID
+  status: Boolean!
+}
+
+input RestockByBranchesParams {
+  branchId: ID!
+  date: String
+}
+
+input OrderItem {
+  product: ID!
+  quantity: Int!
+}
+
+input CreateOrderParams {
+  title: String!
+  type: String!
+  branch: ID!
+  customer: ID!
+  invoiceNo: String
+  discount: String
+  orderItems: [OrderItem]
+  payment: ID
+  orderTotal: Int!
+  grandTotal: Int!
+  tax: Int
+  seller: ID!
+}
+
+input CreateRetalaSubscriptionPlanParams {
+  title: String
+  monthly: Int
+  annual: Int
+  access: [String]
+}
+
+input GetBranchOrders {
+  branchId: ID
+  sellerId: ID
+  type: Int
+  date: String
+}
+
+
+input LoginParams {
+  email: String
+  phone: String
+  password: String!
+}
+
+input UpdateMechantSettingParams {
+  notification: Boolean
+  tax: Boolean
+  printer: String
+}
+
+type Mutation {
+  createNewRetalaUser(newUserParams: CreateAccountParams): User!
+  login(
+  email: String
+  phone: String
+  password: String!): LoginReturnType!
+  verifyEmail(id: String!): Result!
+  verifyPhoneNumber(id: String!): Result!
+  generateAuthToken(id: ID!): Result!
+  resetPassword(password: String!, token: String!): Result!
+  updateRetalaUser(id: ID!, updateUserParams: UpdateUserAccountParams): User!
+  deleteRetalaUser(id: ID!): Result!
+  createSeller(newSellerParams: CreateSellerParams): Seller!
+  deleteSalesPerson(merchantId: ID!):Result!
+  createRetalaMerchant(params: CreateMerchantParams, branchParams: CreateRetalaBranchParams): Merchant!
+  editRetalaMerchant(id: ID!, params: EditRetalaMerchantParams): Result!  
+  deleteRetalaMerchant(merchantId: ID!): Result!
+  updateMerchantSetting(id: ID!, setting: UpdateMechantSettingParams): Result
+  createRetalaBranch(params: CreateRetalaBranchParams): Branch!
+  editRetalaBranch(branchId: ID, params:EditRetalaBranchParams): Result!
+  deleteRetalaBranch(branchId: ID!): Result!
+  createCustomer(params: CreateRetalaCustomerParams): Customer!
+  editCustomer(id: ID!, name: String!, phone: String!): Result!
+  createNewProduct(params: createRetalaProductParams): Product!
+  editProduct(id: ID!, params: EditRetalaProductParams): Result!
+  unpackProducts(params: unpackProductsParams): Product!
+  deleteProduct(id: ID!): Result!
+  createPayment(params: CreateRetalaPaymentParams): Payment
+  startTrial(id: ID!): Result!
+  createRetalaQuantity(params: CreateRetalaQuantityParams): Quantity!
+  deleteQuantity(quantityID: ID!): Result!
+  restockByBranches(params: RestockByBranchesParams): [Restock!]!
+  addNewRestock(params: CreateRestockParams): Restock!
+  changeRestock(params: ChangeTransferParams): Restock!
+  changeTransfer(params: ChangeTransferParams): Restock!
+  createPlan(params: CreateRetalaSubscriptionPlanParams): RetalaSubscriptionPlan!
+  editPlan(id: ID!, params: CreateRetalaSubscriptionPlanParams): Result!
+  deletePlan(id:ID!): Result!
+  createOrder(params: CreateOrderParams): RetalaOrder!
+  editOrder(id: ID!, params: CreateOrderParams):Result!
+  deleteOrder(id:ID!):RetalaOrder!
+  returnOrder(id: ID!, comment: String): Result
+}

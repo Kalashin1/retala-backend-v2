@@ -1,0 +1,8 @@
+POST https://peaceful-shaw-e0898c.netlify.app/.netlify/functions/login
+Content-Type: application/json
+
+{
+  "phone": "+2348149793913",
+  "email": "kinaneesamsonjohn@gmail.com",
+  "password": "Test1234"
+}
